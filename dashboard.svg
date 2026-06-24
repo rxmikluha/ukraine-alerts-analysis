@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="100%" height="100%">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="1"/>
+    </pattern>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <style>
+    .bg { fill: #0a0f1a; }
+    .text-title { fill: #f8fafc; font-family: 'Courier New', Courier, monospace; font-size: 22px; font-weight: bold; letter-spacing: 1px; }
+    .text-sub { fill: #64748b; font-family: 'Courier New', Courier, monospace; font-size: 14px; }
+    .node { fill: #3b82f6; cursor: pointer; transition: all 0.3s ease; }
+    .node:hover { fill: #60a5fa; stroke: #fff; stroke-width: 2px; }
+    .node-origin { fill: #ef4444; }
+    .label { fill: #cbd5e1; font-family: sans-serif; font-size: 14px; font-weight: bold; pointer-events: none; }
+    .edge { stroke: #334155; stroke-width: 2; stroke-dasharray: 6,6; transition: stroke 0.3s ease; }
+    .edge-active { stroke: #ef4444; stroke-width: 3; stroke-dasharray: none; }
+    .panel { fill: #1e293b; stroke: #475569; stroke-width: 1; rx: 6; ry: 6; }
+    .panel-text { fill: #10b981; font-family: 'Courier New', monospace; font-size: 13px; pointer-events: none; }
+    .panel-alert { fill: #ef4444; font-family: 'Courier New', monospace; font-size: 13px; font-weight: bold; pointer-events: none; }
+    .particle { fill: #ef4444; opacity: 0; }
+  </style>
+
+  <rect width="100%" height="100%" class="bg" />
+  <rect width="100%" height="100%" fill="url(#grid)" />
+
+  <text x="30" y="40" class="text-title">SYSTEM: THREAT PROPAGATION OVERVIEW</text>
+  <text x="30" y="65" class="text-sub">STATUS: ONLINE | INTERACTIVE: TRUE | CLICK NODES TO SIMULATE</text>
+
+  <g id="info-panel" transform="translate(30, 450)">
+    <rect width="320" height="120" class="panel" />
+    <text x="15" y="25" class="panel-alert">>> TACTICAL DATA FEED</text>
+    <text x="15" y="50" class="panel-text" id="data-city">Target: SELECT SECTOR</text>
+    <text x="15" y="75" class="panel-text" id="data-lag">Calculated Latency: --</text>
+    <text x="15" y="100" class="panel-text" id="data-risk">Risk Profile: --</text>
+  </g>
+
+  <path id="path-k-p" class="edge" d="M 700 250 L 500 300" />
+  <path id="path-k-d" class="edge" d="M 700 250 L 550 450" />
+  <path id="path-p-ky" class="edge" d="M 500 300 L 250 200" />
+
+  <circle id="particle-k-p" r="6" class="particle" filter="url(#glow)">
+    <animateMotion dur="1.5s" begin="indefinite" fill="freeze"><mpath href="#path-k-p"/></animateMotion>
+  </circle>
+  <circle id="particle-k-d" r="6" class="particle" filter="url(#glow)">
+    <animateMotion dur="2s" begin="indefinite" fill="freeze"><mpath href="#path-k-d"/></animateMotion>
+  </circle>
+  <circle id="particle-p-ky" r="6" class="particle" filter="url(#glow)">
+    <animateMotion dur="2.5s" begin="indefinite" fill="freeze"><mpath href="#path-p-ky"/></animateMotion>
+  </circle>
+
+  <g id="node-kyiv" transform="translate(250, 200)" onclick="triggerData('Kyiv', '~33.4 mins from Poltava', 'SECONDARY IMPACT')">
+    <circle r="15" class="node" />
+    <circle r="25" fill="none" stroke="#3b82f6" stroke-width="1" opacity="0.5" />
+    <text x="-15" y="-25" class="label">Kyiv</text>
+  </g>
+
+  <g id="node-poltava" transform="translate(500, 300)" onclick="triggerData('Poltava', '~20.0 mins from Kharkiv', 'PRIMARY TRANSIT')">
+    <circle r="15" class="node" />
+    <text x="-25" y="-25" class="label">Poltava</text>
+  </g>
+
+  <g id="node-dnipro" transform="translate(550, 450)" onclick="triggerData('Dnipro', '~31.1 mins from Kharkiv', 'SOUTHERN VECTOR')">
+    <circle r="15" class="node" />
+    <text x="-25" y="-25" class="label">Dnipro</text>
+  </g>
+
+  <g id="node-kharkiv" transform="translate(700, 250)" onclick="triggerSim()">
+    <circle r="18" class="node node-origin" filter="url(#glow)" />
+    <circle r="30" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.8">
+      <animate attributeName="r" values="18; 50" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.8; 0" dur="2s" repeatCount="indefinite" />
+    </circle>
+    <text x="-25" y="-35" class="label">Kharkiv (ORIGIN)</text>
+  </g>
+
+  <script type="text/javascript">
+    <![CDATA[
+      function triggerData(city, lag, risk) {
+        document.getElementById('data-city').textContent = 'Target: ' + city;
+        document.getElementById('data-lag').textContent = 'Calculated Latency: ' + lag;
+        document.getElementById('data-risk').textContent = 'Risk Profile: ' + risk;
+      }
+
+      function triggerSim() {
+        triggerData('Kharkiv', '0.0 mins (Origin)', 'CRITICAL ORIGIN');
+
+        const edges = ['path-k-p', 'path-k-d', 'path-p-ky'];
+        edges.forEach(id => {
+            const el = document.getElementById(id);
+            el.setAttribute('class', 'edge edge-active');
+            setTimeout(() => el.setAttribute('class', 'edge'), 3000);
+        });
+
+        const particles = ['particle-k-p', 'particle-k-d', 'particle-p-ky'];
+        particles.forEach((id, index) => {
+            const el = document.getElementById(id);
+            el.style.opacity = 1;
+            const anim = el.querySelector('animateMotion');
+
+            if(id === 'particle-p-ky') {
+               setTimeout(() => anim.beginElement(), 1500);
+            } else {
+               anim.beginElement();
+            }
+
+            setTimeout(() => el.style.opacity = 0, 4500);
+        });
+      }
+    ]]>
+  </script>
+</svg>
